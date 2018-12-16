@@ -13,6 +13,7 @@ var connection = mysql.createConnection({
   password: "password",
   database: "bamazon"
 });
+console.log("test");
 
 connection.connect(function(err) {
     if (err) throw err;
