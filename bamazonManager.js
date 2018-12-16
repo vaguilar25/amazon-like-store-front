@@ -51,7 +51,7 @@ function menuOptions() {
             switch (answers.options) {
                 case 'View Products for Sale':
                     viewProducts();
-                   
+
                     break;
                 case 'View Low Inventory':
                     viewLowInventory();
@@ -60,7 +60,7 @@ function menuOptions() {
                     addInventory();
                     break;
                 case 'Add New Product':
-                    addNewProduct();
+                    selectDepartments();
                     break;
                 case 'Quit':
                     return;
@@ -126,7 +126,7 @@ function viewLowInventory() {
 
 }
 
-function addNewProduct() {
+function addNewProduct(array) {
     inquirer.prompt([
         {
             type: "Input",
@@ -134,9 +134,10 @@ function addNewProduct() {
             message: "What is the name of the product you wouls like to add?"
         },
         {
-            type: "Input",
-            name: "department",
-            message: "What is the name of the department?"
+            type: "list",
+            message: "What is the name of the department?",
+            choices: array,
+            name: "department"
         },
         {
             type: "Input",
@@ -149,7 +150,7 @@ function addNewProduct() {
             message: "How many do you have?"
         }
     ]).then(function (newProduct) {
-        insertProduct(newProduct.name,newProduct.department,newProduct.price,newProduct.stock);
+        insertProduct(newProduct.name, newProduct.department, newProduct.price, newProduct.stock);
     });
 
 }
@@ -178,5 +179,17 @@ function insertProduct(productName, departmentName, price, quantity) {
 
     // logs the actual query being run
     console.log(query.sql);
+}
+
+function selectDepartments() {
+    connection.query("SELECT distinct department_name FROM products ", function (err, res) {
+        var array = [];
+        if (err) throw err;
+        for (i = 0; i < res.length; i++) {
+            array.push(res[i].department_name);
+        }
+        addNewProduct(array)
+    });
+
 }
 
