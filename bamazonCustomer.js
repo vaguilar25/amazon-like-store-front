@@ -1,5 +1,6 @@
 var mysql = require("mysql");
 var Table = require('cli-table');
+var inquire = require ('inquirer');
 
 var connection = mysql.createConnection({
     host: "localhost",
@@ -37,7 +38,7 @@ function readProducts() {
         for (var i = 0; i < res.length; i++) {
 
             table.push([res[i].item_id, res[i].product_name, parseFloat(res[i].price).toFixed(2)]);
-           
+
         }
         console.log(table.toString());
 
