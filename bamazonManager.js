@@ -19,7 +19,7 @@ var connection = mysql.createConnection({
 
 connection.connect(function (err) {
     if (err) throw err;
-  //  console.log("connected as id " + connection.threadId + "\n");
+    //  console.log("connected as id " + connection.threadId + "\n");
     //  readProducts();
 });
 
@@ -41,9 +41,9 @@ function menuOptions() {
                     'Add to Inventory',
                     'Add New Product',
                     'Quit'
-                    
+
                 ],
-               
+
 
             }
         ]).then(function (answers) {
@@ -51,7 +51,7 @@ function menuOptions() {
             switch (answers.options) {
                 case 'View Products for Sale':
                     viewProducts();
-                    menuOptions();
+                   
                     break;
                 case 'View Low Inventory':
                     viewLowInventory();
@@ -62,14 +62,14 @@ function menuOptions() {
                 case 'Add New Product':
                     addNewProduct();
                     break;
-                case 'Quit' :
+                case 'Quit':
                     return;
                 default:
                     break;
             }
         });
 
-    }
+}
 
 function viewProducts() {
     console.log("Selecting all products...\n");
@@ -95,7 +95,7 @@ function viewProducts() {
         }
         console.log(table.toString());
     });
-    
+    menuOptions();
 }
 
 function viewLowInventory() {
@@ -122,13 +122,61 @@ function viewLowInventory() {
         }
         console.log(table.toString());
     });
-    
+
+
+}
+
+function addNewProduct() {
+    inquirer.prompt([
+        {
+            type: "Input",
+            name: "name",
+            message: "What is the name of the product you wouls like to add?"
+        },
+        {
+            type: "Input",
+            name: "department",
+            message: "What is the name of the department?"
+        },
+        {
+            type: "Input",
+            name: "price",
+            message: "What is the price of the product?"
+        },
+        {
+            type: "Input",
+            name: "stock",
+            message: "How many do you have?"
+        }
+    ]).then(function (newProduct) {
+        insertProduct(newProduct.name,newProduct.department,newProduct.price,newProduct.stock);
+    });
 
 }
 
 function addInventory() {
 
 }
-function addNewProduct() {
 
+function insertProduct(productName, departmentName, price, quantity) {
+    var query = connection.query(
+        "INSERT INTO products SET ?",
+        {
+            product_name: productName,
+            department_name: departmentName,
+            price: price,
+            stock_quantity: quantity
+        },
+        function (err, res) {
+            console.log("You successfully add your product");
+            menuOptions();
+
+            // Call updateSong AFTER the INSERT completes
+            // updateSong();
+        }
+    );
+
+    // logs the actual query being run
+    console.log(query.sql);
 }
+
