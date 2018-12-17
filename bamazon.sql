@@ -35,4 +35,15 @@ CREATE TABLE products
     ("4M Crystal Growing Experiment" , "Toys and Games" , "4", 15),
     ("Monopoly Fortnite" , "Toys and Games" , "30.00", 20);
   
-                                        
+  -- TABLE THAT STORES DEPARTMENTS INFO
+CREATE TABLE departments
+(
+  department_id INT NOT NULL AUTO_INCREMENT,
+  department_name VARCHAR(50) NOT NULL ,
+  over_head_costs DECIMAL (10,2),
+   PRIMARY KEY (department_id)
+);
+
+-- ADD NEW COLUMN FOR PRODUCTS
+ALTER TABLE products 
+ADD COLUMN product_sales DECIMAL (10,2);
