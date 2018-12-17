@@ -19,13 +19,10 @@ var connection = mysql.createConnection({
 
 connection.connect(function (err) {
     if (err) throw err;
-    //  console.log("connected as id " + connection.threadId + "\n");
-    //  readProducts();
+     
 });
 
-
-
-menuOptions()
+menuOptions(); 
 
 function menuOptions() {
     inquirer
@@ -57,17 +54,37 @@ function menuOptions() {
                     viewLowInventory();
                     break;
                 case 'Add to Inventory':
-                    addInventory();
+                    createArrayOfProducts();
                     break;
                 case 'Add New Product':
                     selectDepartments();
                     break;
                 case 'Quit':
-                    return;
+                    break;
                 default:
                     break;
             }
         });
+
+}
+
+function createArrayOfProducts() {
+
+    connection.query("SELECT * FROM products", function (err, res) {
+        if (err) throw err;
+        // Log all results of the SELECT statement
+        //console.log(res);
+        var arrayProducts = [];
+
+        for (var i = 0; i < res.length; i++) {
+
+
+            arrayProducts.push({ key: res[i].item_id, value: res[i].product_name });
+
+        }
+        addNewInventory(arrayProducts);
+
+    });
 
 }
 
@@ -77,7 +94,7 @@ function viewProducts() {
         if (err) throw err;
         // Log all results of the SELECT statement
         //console.log(res);
-
+        arrayProducts = [];
         var table = new Table({
             head: ['ID', 'DEPARTMENT', 'PRODUCT', 'PRICE', 'STOCK']
             , colWidths: [4, 20, 50, 10, 10]
@@ -91,9 +108,11 @@ function viewProducts() {
                 res[i].product_name,
                 parseFloat(res[i].price).toFixed(2), res[i].stock_quantity]
             );
+            arrayProducts.push(res[i].item_id = res[i].product_name);
 
         }
         console.log(table.toString());
+
     });
     menuOptions();
 }
@@ -102,8 +121,7 @@ function viewLowInventory() {
     console.log("Selecting all products...\n");
     connection.query("SELECT * FROM products where stock_quantity <5", function (err, res) {
         if (err) throw err;
-        // Log all results of the SELECT statement
-        //console.log(res);
+
 
         var table = new Table({
             head: ['ID', 'DEPARTMENT', 'PRODUCT', 'PRICE', 'STOCK']
@@ -131,7 +149,7 @@ function addNewProduct(array) {
         {
             type: "Input",
             name: "name",
-            message: "What is the name of the product you wouls like to add?"
+            message: "What is the name of the product you would like to add?"
         },
         {
             type: "list",
@@ -155,9 +173,79 @@ function addNewProduct(array) {
 
 }
 
-function addInventory() {
+function addNewInventory(arrayProducts) {
+    console.log(arrayProducts);
+    inquirer.prompt([
+        {
+            type: "list",
+            message: "Select the product you want to add stock:",
+            choices: arrayProducts,
+            name: "product"
+
+
+        }
+    ]).then(function (addStock) {
+
+        console.log("stock", addStock.product);
+
+        getCurrenStock(addStock.product);
+
+    });
 
 }
+
+function promptForQuantity(product, currentStock) {
+    //var currentStock =  getCurrenStock(product);
+    inquirer.prompt([
+
+        {
+            type: "input",
+            message: "How much quantity you want to add?",
+            name: "quantity"
+        }
+    ]).then(function (response) {
+
+        var newStock = parseInt(currentStock) + parseInt(response.quantity);
+        updateInventory(product, newStock);
+
+
+    });
+
+}
+
+function getCurrenStock(product) {
+    var query = `SELECT stock_quantity FROM products where product_name = "${product}"`;
+
+    connection.query(query, function (err, res) {
+
+        if (err) throw err;
+
+        promptForQuantity(product, res[0].stock_quantity);
+
+    });
+
+}
+
+function updateInventory(name, stock) {
+
+    var query = connection.query(
+        "UPDATE products SET ? WHERE ?",
+        [
+            {
+                stock_quantity: stock
+            },
+            {
+                product_name: name
+            }
+        ],
+        function (err, res) {
+            menuOptions();
+        }
+    );
+
+
+}
+
 
 function insertProduct(productName, departmentName, price, quantity) {
     var query = connection.query(
@@ -169,16 +257,10 @@ function insertProduct(productName, departmentName, price, quantity) {
             stock_quantity: quantity
         },
         function (err, res) {
-            console.log("You successfully add your product");
+            console.log(product_name + "Added to the database of BAMAZON!");
             menuOptions();
-
-            // Call updateSong AFTER the INSERT completes
-            // updateSong();
         }
     );
-
-    // logs the actual query being run
-    console.log(query.sql);
 }
 
 function selectDepartments() {
