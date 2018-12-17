@@ -40,7 +40,8 @@ connection.connect(function (err) {
 
 function readProducts(quantitySelect) {
     console.log("Selecting all products...\n");
-    connection.query("SELECT * FROM products", function (err, res) {
+   connection.query("SELECT * FROM products", function (err, res) {
+       
         if (err) throw err;
         // Log all results of the SELECT statement
         //console.log(res);
@@ -112,10 +113,10 @@ function checkInventory(idSelect, quantitySelect) {
 
             if (quantitySelect <= results.stock_quantity) {
                 var new_stock = results.stock_quantity - quantitySelect;
-                calculatePurchase(idSelect, quantitySelect,results.price);
-                updateStock(idSelect, new_stock);
+                selectProductSales(idSelect, quantitySelect,results.price,new_stock);
+               // updateStock(idSelect, new_stock);
 
-                readProducts();
+                //readProducts();
                 
                 // if (!isNaN(recentOrder) ) {
                 //console.log("The total cost of your purchase is:" + recentOrder.total);
@@ -145,17 +146,46 @@ function updateStock(idSelect, new_stock) {
 
             // connection.end();
         });
+
+        readProducts();
 }
 
-function calculatePurchase(id, quantitySelect, price,) {
+function selectProductSales(idSelect, quantitySelect, price,new_stock) {
     //  recentOrder = new purchase(idSelect,results.price,parseFloat(totalPurchase).toFixed(2));
    // var totalPurchase = quantitySelect * price;
-   console.log(id);
-   console.log(price);
-   console.log(quantitySelect);
    
-    recentOrder = new purchase(id, price,quantitySelect);
+     recentOrder = new purchase(idSelect, price,quantitySelect);
     //return recentOrder;
+    var query = "SELECT coalesce(product_sales,0) as product_sales FROM products where item_id = " + idSelect;
+    
+    connection.query(query,function (err, res, fields) {
+        if (err) throw err;
+        // Log all results of the SELECT statement
+        //console.log(res);
+        
 
+        // connection.end();
+        
+        calculatePurchase(idSelect, quantitySelect, price,new_stock,res[0].product_sales)
+    });
+    
 }
+ function calculatePurchase(id, quantitySelect, price,new_stock,product_sales) {   
+   
+    var totalSales = product_sales + (price * quantitySelect);
+    var query ="UPDATE products set product_sales = " + parseFloat(totalSales).toFixed(2) + " WHERE item_id =" + id;
+   
+    connection.query(query,
+    function (err, res, fields) {
+        if (err) throw err;
+       
+
+        // connection.end();
+    });
+
+   // readProducts();
+
+    updateStock(id, new_stock);
+}
+
 
