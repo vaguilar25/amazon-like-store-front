@@ -97,7 +97,7 @@ function viewProducts() {
         arrayProducts = [];
         var table = new Table({
             head: ['ID', 'DEPARTMENT', 'PRODUCT', 'PRICE', 'STOCK']
-            , colWidths: [4, 20, 50, 10, 10]
+            , colWidths: [4, 20, 45, 10, 10]
         });
 
         for (var i = 0; i < res.length; i++) {
