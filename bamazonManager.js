@@ -60,6 +60,9 @@ function menuOptions() {
                     selectDepartments();
                     break;
                 case 'Quit':
+                    //console.log("QUIT");
+                    connection.end();
+                    process.exit();
                     break;
                 default:
                     break;

@@ -17,16 +17,16 @@ var connection = mysql.createConnection({
 });
 console.log("test");
 
-var purchase = function (id, price,quantity) {
+var purchase = function (id, price, quantity) {
     this.id = id,
         this.quantity,
         this.price = price,
-        this.total = function() {
-           var total=this.price * this.quantity; 
-          console.log("The total cost of your purchase is: " + parseFloat(total).toFixed(2));
-          // return
+        this.total = function () {
+            var total = this.price * this.quantity;
+            console.log("The total cost of your purchase is: " + parseFloat(total).toFixed(2));
+            // return
         }
-        
+
 
 }
 
@@ -39,37 +39,32 @@ connection.connect(function (err) {
 });
 
 function readProducts(quantitySelect) {
-    console.log("Selecting all products...\n");
-   connection.query("SELECT * FROM products", function (err, res) {
-       
+
+    connection.query("Select * FROM products", function (err, res) {
+
         if (err) throw err;
-        // Log all results of the SELECT statement
-        //console.log(res);
+
 
         var table = new Table({
-            head: ['ID', 'DEPARTMENT', 'PRODUCT', 'PRICE', 'STOCK']
-            , colWidths: [4, 20, 45, 10, 10]
+            head: ['ID', 'DEPARTMENT', 'PRODUCT', 'PRICE', 'STOCK', 'SALES']
+            , colWidths: [4, 20, 45, 10, 10, 10]
         });
 
         for (var i = 0; i < res.length; i++) {
 
-            table.push([res[i].item_id, res[i].department_name, res[i].product_name, parseFloat(res[i].price).toFixed(2), res[i].stock_quantity]);
+            table.push([res[i].item_id, res[i].department_name, res[i].product_name, parseFloat(res[i].price).toFixed(2), res[i].stock_quantity, res[i].product_sales]);
 
         }
         console.log(table.toString());
-
-     // recentOrder.total();
-
-
+        console.log("==================================================================================================\n");
+        
+        inquireIdPurchase();
     });
-    
-    //if (!isNaN(recentOrder)) {
-      // recentOrder.total();
-   // }
-   // return
+
+
 }
-inquireIdPurchase();
-//recentOrder.total();
+
+
 
 
 function inquireIdPurchase() {
@@ -77,12 +72,15 @@ function inquireIdPurchase() {
         {
             type: "Input",
             name: "id",
-            message: "What is the id of the item you would like to purchase?"
+            message: "What is the id of the item you would like to purchase? (For Quit press Q)"
         }
     ]).then(function (idSelect) {
-
-        inquireQuantityPurchase(idSelect.id);
-
+        if (idSelect.id === "Q") {
+            connection.end();
+            process.exit();
+        } else {
+            inquireQuantityPurchase(idSelect.id);
+        }
     });
 
 }
@@ -107,25 +105,16 @@ function checkInventory(idSelect, quantitySelect) {
 
         , function (err, res, fields) {
             if (err) throw err;
-            // Log all results of the SELECT statement
-            //console.log(res);
+
             var results = res[0];
 
             if (quantitySelect <= results.stock_quantity) {
                 var new_stock = results.stock_quantity - quantitySelect;
-                selectProductSales(idSelect, quantitySelect,results.price,new_stock);
-               // updateStock(idSelect, new_stock);
+                selectProductSales(idSelect, quantitySelect, results.price, new_stock);
 
-                //readProducts();
-                
-                // if (!isNaN(recentOrder) ) {
-                //console.log("The total cost of your purchase is:" + recentOrder.total);
-                //}
-
-
-                //console.log("Your TOTAL purchase is: $" +  parseFloat(totalPurchase).toFixed(2));
             } else {
                 console.log("Insufficient quantity!");
+                inquireIdPurchase();
             }
 
         });
@@ -140,50 +129,37 @@ function updateStock(idSelect, new_stock) {
         ],
         function (err, res, fields) {
             if (err) throw err;
-            // Log all results of the SELECT statement
-            //console.log(res);
 
-
-            // connection.end();
         });
 
-        readProducts();
+    readProducts();
+
+
 }
 
-function selectProductSales(idSelect, quantitySelect, price,new_stock) {
-    //  recentOrder = new purchase(idSelect,results.price,parseFloat(totalPurchase).toFixed(2));
-   // var totalPurchase = quantitySelect * price;
-   
-     recentOrder = new purchase(idSelect, price,quantitySelect);
-    //return recentOrder;
+function selectProductSales(idSelect, quantitySelect, price, new_stock) {
+
+    recentOrder = new purchase(idSelect, price, quantitySelect);
+
     var query = "SELECT coalesce(product_sales,0) as product_sales FROM products where item_id = " + idSelect;
-    
-    connection.query(query,function (err, res, fields) {
-        if (err) throw err;
-        // Log all results of the SELECT statement
-        //console.log(res);
-        
 
-        // connection.end();
-        
-        calculatePurchase(idSelect, quantitySelect, price,new_stock,res[0].product_sales)
+    connection.query(query, function (err, res, fields) {
+        if (err) throw err;
+
+        calculatePurchase(idSelect, quantitySelect, price, new_stock, res[0].product_sales)
     });
-    
+
 }
- function calculatePurchase(id, quantitySelect, price,new_stock,product_sales) {   
-   
+
+function calculatePurchase(id, quantitySelect, price, new_stock, product_sales) {
+
     var totalSales = product_sales + (price * quantitySelect);
-    var query ="UPDATE products set product_sales = " + parseFloat(totalSales).toFixed(2) + " WHERE item_id =" + id;
-   
+    var query = "UPDATE products set product_sales = " + parseFloat(totalSales).toFixed(2) + " WHERE item_id =" + id;
+
     connection.query(query,
-    function (err, res, fields) {
-        if (err) throw err;
-       
-
-        // connection.end();
-    });
-
-   // readProducts();
+        function (err, res, fields) {
+            if (err) throw err;
+        });
 
     updateStock(id, new_stock);
 }

@@ -51,6 +51,8 @@ function menuOptions() {
                     break;
 
                 case 'Quit':
+                    connection.end();
+                    process.exit();
                     break;
                 default:
                     break;
@@ -66,7 +68,7 @@ function viewProductsSalesByDep() {
 
     connection.query(query, function (err, res) {
         if (err) throw err;
-        
+
         var table = new Table({
             head: ['ID', 'DEPARTMENT', 'OVER HEAD COST', 'PRODUCT SALES', 'TOTAL PROFIT']
             , colWidths: [4, 20, 20, 20, 20]
@@ -74,7 +76,7 @@ function viewProductsSalesByDep() {
 
         for (var i = 0; i < res.length; i++) {
             var total_profit = res[i].product_sales - res[i].over_head_costs;
-           
+
             table.push(
                 [res[i].department_id,
                 res[i].department_name,
@@ -84,7 +86,7 @@ function viewProductsSalesByDep() {
                 ]);
 
         }
-        
+
         console.log("\n\n", table.toString());
     });
     menuOptions();
