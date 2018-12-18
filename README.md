@@ -14,13 +14,14 @@ The app will take in orders from customers and delete stock from the store's inv
     * push
 ```
 
-* Use of JavaScript and NodeJs
+* Use of JavaScript, NodeJs, mySQL
 ```
     * Anonymous functions
     * constructors
     * loops
     * inquiere npm
-    * module exports
+    * Select, Update, Joins
+ 
     
 ``` 
 
@@ -36,6 +37,28 @@ The app will take in orders from customers and delete stock from the store's inv
         
 ``` 
 
+* Tables
+```
+* products
+    item_id
+    product_name
+    departmente_name
+    price
+    stock_quantity
+
+* departments
+    department_id
+    department_name
+    over_head_costs
+
+```
+* Demo 
+   * Customer
+![](bamazonCustomer.gif)
+   * Manager
+![](bamazonManager.gif)
+   * Supervisor
+![](bamazonSupervisor.gif)
 
 ## Built With
 
