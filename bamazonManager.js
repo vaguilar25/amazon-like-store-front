@@ -19,10 +19,10 @@ var connection = mysql.createConnection({
 
 connection.connect(function (err) {
     if (err) throw err;
-     
+
 });
 
-menuOptions(); 
+menuOptions();
 
 // Initial options
 
@@ -46,7 +46,7 @@ function menuOptions() {
 
             }
         ]).then(function (answers) {
-            
+
             switch (answers.options) {
                 case 'View Products for Sale':
                     viewProducts();
@@ -78,7 +78,7 @@ function createArrayOfProducts() {
 
     connection.query("SELECT * FROM products", function (err, res) {
         if (err) throw err;
-        
+
         var arrayProducts = [];
 
         for (var i = 0; i < res.length; i++) {
@@ -98,11 +98,11 @@ function viewProducts() {
     console.log("Selecting all products...\n");
     connection.query("SELECT * FROM products", function (err, res) {
         if (err) throw err;
-      
+
         arrayProducts = [];
         var table = new Table({
-            head: ['ID', 'DEPARTMENT', 'PRODUCT', 'PRICE', 'STOCK']
-            , colWidths: [4, 20, 45, 10, 10]
+            head: ['ID', 'DEPARTMENT', 'PRODUCT', 'PRICE', 'STOCK','SALES']
+            , colWidths: [4, 20, 45, 10, 10,10]
         });
 
         for (var i = 0; i < res.length; i++) {
@@ -111,7 +111,10 @@ function viewProducts() {
                 [res[i].item_id,
                 res[i].department_name,
                 res[i].product_name,
-                parseFloat(res[i].price).toFixed(2), res[i].stock_quantity]
+                parseFloat(res[i].price).toFixed(2),
+                res[i].stock_quantity,
+                res[i].product_sales
+                ]
             );
             arrayProducts.push(res[i].item_id = res[i].product_name);
 
@@ -119,7 +122,7 @@ function viewProducts() {
         console.log(table.toString());
         menuOptions();
     });
-  
+
 }
 
 //VIEW LOW INVENTORY
@@ -130,8 +133,8 @@ function viewLowInventory() {
 
 
         var table = new Table({
-            head: ['ID', 'DEPARTMENT', 'PRODUCT', 'PRICE', 'STOCK']
-            , colWidths: [4, 20, 50, 10, 10]
+            head: ['ID', 'DEPARTMENT', 'PRODUCT', 'PRICE', 'STOCK', 'SALES']
+            , colWidths: [4, 20, 50, 10, 10,10]
         });
 
         for (var i = 0; i < res.length; i++) {
@@ -140,7 +143,8 @@ function viewLowInventory() {
                 [res[i].item_id,
                 res[i].department_name,
                 res[i].product_name,
-                parseFloat(res[i].price).toFixed(2), res[i].stock_quantity]
+                parseFloat(res[i].price).toFixed(2), res[i].stock_quantity,
+                res[i].product_sales]
             );
 
         }
@@ -184,7 +188,7 @@ function addNewProduct(array) {
 
 //ADD INVENTORY -- PROMPT THE USER TO SELECT THE PRODUCT HE WANTS TO UPDATE 
 function addNewInventory(arrayProducts) {
-   
+
     inquirer.prompt([
         {
             type: "list",
@@ -206,7 +210,7 @@ function addNewInventory(arrayProducts) {
 
 //ADD INVENTORY -- PROMPT THE USER TO SELECT THE QUANTITY HE WANT TO ADD INVENTORY TO 
 function promptForQuantity(product, currentStock) {
-    
+
     inquirer.prompt([
 
         {
@@ -265,7 +269,8 @@ function insertProduct(productName, departmentName, price, quantity) {
             product_name: productName,
             department_name: departmentName,
             price: price,
-            stock_quantity: quantity
+            stock_quantity: quantity,
+            product_sales: 0
         },
         function (err, res) {
             console.log(productName + "Added to the database of BAMAZON!");

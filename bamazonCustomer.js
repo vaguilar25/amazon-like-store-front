@@ -45,19 +45,28 @@ connection.connect(function (err) {
 
 //SELECT THE PRODUCTS TO DISPLAY
 
-function readProducts() {
+function readProducts(quantitySelect) {
     connection.query("Select * FROM products", function (err, res) {
 
         if (err) throw err;
+        //console.log(res);
         var table = new Table({
             head: ['ID', 'DEPARTMENT', 'PRODUCT', 'PRICE', 'STOCK', 'SALES']
             , colWidths: [4, 20, 45, 10, 10, 10]
         });
-
+       // console.log(table);
         for (var i = 0; i < res.length; i++) {
-            table.push([res[i].item_id, res[i].department_name, res[i].product_name, parseFloat(res[i].price).toFixed(2), res[i].stock_quantity, res[i].product_sales]);
+            table.push(
+                [res[i].item_id, 
+                res[i].department_name, 
+                res[i].product_name, 
+                parseFloat(res[i].price).toFixed(2), 
+                res[i].stock_quantity, 
+                res[i].product_sales]
+                );
 
         }
+        console.log(table);
         console.log(table.toString());
         console.log("==================================================================================================\n");
 
