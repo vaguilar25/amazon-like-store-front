@@ -15,22 +15,27 @@ var connection = mysql.createConnection({
     password: "password",
     database: "bamazon"
 });
-console.log("test");
 
-var purchase = function (id, price, quantity) {
+//Object to hold the total purchase
+var purchase = function (id, quantity, price) {
     this.id = id,
-        this.quantity,
+        this.quantity = quantity,
         this.price = price,
         this.total = function () {
-            var total = this.price * this.quantity;
-            console.log("The total cost of your purchase is: " + parseFloat(total).toFixed(2));
-            // return
+            var totalPurchase = this.price * this.quantity;
+
+            if (totalPurchase === 0) {
+                console.log("0");
+            } else {
+                console.log("\x1b[33m The total cost of your purchase is: " + parseFloat(totalPurchase).toFixed(2) + "\n \x1b[37m");
+            }
+
         }
 
 
 }
 
-var recentOrder;
+var newPurchase = new purchase(0, 0, 0);
 
 connection.connect(function (err) {
     if (err) throw err;
@@ -38,36 +43,35 @@ connection.connect(function (err) {
     readProducts();
 });
 
-function readProducts(quantitySelect) {
+//SELECT THE PRODUCTS TO DISPLAY
 
+function readProducts() {
     connection.query("Select * FROM products", function (err, res) {
 
         if (err) throw err;
-
-
         var table = new Table({
             head: ['ID', 'DEPARTMENT', 'PRODUCT', 'PRICE', 'STOCK', 'SALES']
             , colWidths: [4, 20, 45, 10, 10, 10]
         });
 
         for (var i = 0; i < res.length; i++) {
-
             table.push([res[i].item_id, res[i].department_name, res[i].product_name, parseFloat(res[i].price).toFixed(2), res[i].stock_quantity, res[i].product_sales]);
 
         }
         console.log(table.toString());
         console.log("==================================================================================================\n");
-        
+
+        if (newPurchase.id != 0) {
+            newPurchase.total();
+        }
         inquireIdPurchase();
     });
-
-
 }
 
-
-
+//PROMPT THE USER FOR THE ITEM HE WANTS TO PURCHASE
 
 function inquireIdPurchase() {
+    //purchase.total();
     inquirer.prompt([
         {
             type: "Input",
@@ -85,6 +89,7 @@ function inquireIdPurchase() {
 
 }
 
+//PROMPT THE USER FOR QUANTITY
 function inquireQuantityPurchase(idSelect) {
     inquirer.prompt([
         {
@@ -97,12 +102,13 @@ function inquireQuantityPurchase(idSelect) {
     });
 }
 
+
+// CHECK THE INVENTORY FOR ENOUGH QUANTITY
 function checkInventory(idSelect, quantitySelect) {
     connection.query("SELECT product_name,stock_quantity,price FROM products where item_id = ? ",
         [
             idSelect
         ]
-
         , function (err, res, fields) {
             if (err) throw err;
 
@@ -121,6 +127,7 @@ function checkInventory(idSelect, quantitySelect) {
 
 }
 
+//UPDATE STOCKS 
 function updateStock(idSelect, new_stock) {
     connection.query("UPDATE products set stock_quantity = ? WHERE item_id = ?",
         [
@@ -136,6 +143,8 @@ function updateStock(idSelect, new_stock) {
 
 
 }
+
+// SELECT PRODUCT SALES TO UPDATE THE PRODUCT SALES
 
 function selectProductSales(idSelect, quantitySelect, price, new_stock) {
 
@@ -160,6 +169,9 @@ function calculatePurchase(id, quantitySelect, price, new_stock, product_sales) 
         function (err, res, fields) {
             if (err) throw err;
         });
+
+
+    newPurchase = new purchase(id, quantitySelect, price);
 
     updateStock(id, new_stock);
 }

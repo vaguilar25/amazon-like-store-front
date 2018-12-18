@@ -23,6 +23,7 @@ connection.connect(function (err) {
 
 menuOptions();
 
+//PROMPT THE USER FOR OPTIONS
 function menuOptions() {
     inquirer
         .prompt([
@@ -40,7 +41,7 @@ function menuOptions() {
 
             }
         ]).then(function (answers) {
-            //console.log(JSON.stringify(answers, null, '  '));
+      
             switch (answers.options) {
                 case 'View Product Sales by Department':
                     viewProductsSalesByDep();
@@ -86,10 +87,11 @@ function viewProductsSalesByDep() {
                 ]);
 
         }
-
-        console.log("\n\n", table.toString());
+        console.log();
+        console.log( table.toString());
+        menuOptions();
     });
-    menuOptions();
+   
 };
 
 function createNewDepartment() {

@@ -24,6 +24,8 @@ connection.connect(function (err) {
 
 menuOptions(); 
 
+// Initial options
+
 function menuOptions() {
     inquirer
         .prompt([
@@ -44,7 +46,7 @@ function menuOptions() {
 
             }
         ]).then(function (answers) {
-            //console.log(JSON.stringify(answers, null, '  '));
+            
             switch (answers.options) {
                 case 'View Products for Sale':
                     viewProducts();
@@ -71,12 +73,12 @@ function menuOptions() {
 
 }
 
+//create array of products to display as a selection when is prompted
 function createArrayOfProducts() {
 
     connection.query("SELECT * FROM products", function (err, res) {
         if (err) throw err;
-        // Log all results of the SELECT statement
-        //console.log(res);
+        
         var arrayProducts = [];
 
         for (var i = 0; i < res.length; i++) {
@@ -91,12 +93,12 @@ function createArrayOfProducts() {
 
 }
 
+//FUNCTION TO DISPLAY TABLE OF PRODUCTS
 function viewProducts() {
     console.log("Selecting all products...\n");
     connection.query("SELECT * FROM products", function (err, res) {
         if (err) throw err;
-        // Log all results of the SELECT statement
-        //console.log(res);
+      
         arrayProducts = [];
         var table = new Table({
             head: ['ID', 'DEPARTMENT', 'PRODUCT', 'PRICE', 'STOCK']
@@ -115,11 +117,12 @@ function viewProducts() {
 
         }
         console.log(table.toString());
-
+        menuOptions();
     });
-    menuOptions();
+  
 }
 
+//VIEW LOW INVENTORY
 function viewLowInventory() {
     console.log("Selecting all products...\n");
     connection.query("SELECT * FROM products where stock_quantity <5", function (err, res) {
@@ -142,10 +145,13 @@ function viewLowInventory() {
 
         }
         console.log(table.toString());
+        menuOptions();
     });
 
 
 }
+
+//PROMPT TO ADD NEW PRODUCT
 
 function addNewProduct(array) {
     inquirer.prompt([
@@ -176,8 +182,9 @@ function addNewProduct(array) {
 
 }
 
+//ADD INVENTORY -- PROMPT THE USER TO SELECT THE PRODUCT HE WANTS TO UPDATE 
 function addNewInventory(arrayProducts) {
-    console.log(arrayProducts);
+   
     inquirer.prompt([
         {
             type: "list",
@@ -197,8 +204,9 @@ function addNewInventory(arrayProducts) {
 
 }
 
+//ADD INVENTORY -- PROMPT THE USER TO SELECT THE QUANTITY HE WANT TO ADD INVENTORY TO 
 function promptForQuantity(product, currentStock) {
-    //var currentStock =  getCurrenStock(product);
+    
     inquirer.prompt([
 
         {
@@ -215,7 +223,7 @@ function promptForQuantity(product, currentStock) {
     });
 
 }
-
+//ADD INVENTORY -- GET CURRENT STOCK
 function getCurrenStock(product) {
     var query = `SELECT stock_quantity FROM products where product_name = "${product}"`;
 
@@ -228,7 +236,7 @@ function getCurrenStock(product) {
     });
 
 }
-
+//ADD INVENTORY -- UPDATE PRODUCT QUANTITY
 function updateInventory(name, stock) {
 
     var query = connection.query(
@@ -249,7 +257,7 @@ function updateInventory(name, stock) {
 
 }
 
-
+//INSERT PRODUCT
 function insertProduct(productName, departmentName, price, quantity) {
     var query = connection.query(
         "INSERT INTO products SET ?",
@@ -260,11 +268,12 @@ function insertProduct(productName, departmentName, price, quantity) {
             stock_quantity: quantity
         },
         function (err, res) {
-            console.log(product_name + "Added to the database of BAMAZON!");
+            console.log(productName + "Added to the database of BAMAZON!");
             menuOptions();
         }
     );
 }
+
 
 function selectDepartments() {
     connection.query("SELECT distinct department_name FROM products ", function (err, res) {
