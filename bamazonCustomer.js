@@ -39,7 +39,7 @@ var newPurchase = new purchase(0, 0, 0);
 
 connection.connect(function (err) {
     if (err) throw err;
-    console.log("connected as id " + connection.threadId + "\n");
+  
     readProducts();
 });
 
@@ -66,7 +66,7 @@ function readProducts(quantitySelect) {
                 );
 
         }
-        console.log(table);
+        
         console.log(table.toString());
         console.log("==================================================================================================\n");
 
